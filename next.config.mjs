@@ -17,6 +17,20 @@ const config = {
     locales: ["en"],
     defaultLocale: "en",
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '*.steampowered.com',
+        pathname: '**'
+      },
+      {
+        protocol: 'https',
+        hostname: '*.steamstatic.com',
+        pathname: '**'
+      }
+    ]
+  }
 };
 
 export default config;
