@@ -23,5 +23,6 @@
     "steamid",
     "steamids",
     "timecreated"
-  ]
+  ],
+  "editor.defaultFormatter": "esbenp.prettier-vscode"
 }
