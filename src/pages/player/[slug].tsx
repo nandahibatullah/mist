@@ -1,4 +1,5 @@
 import { Loader } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import { useRouter } from "next/router";
 import { api } from "~/utils/api";
 
@@ -21,8 +22,11 @@ export default function Player() {
 
   if (isError) {
     void router.push("/");
-    // replace with notification
-    console.log(error.message);
+    notifications.show({
+      title: "Steam profile not found",
+      message: error.message,
+      color: "red",
+    });
   }
 
   return (

@@ -4,8 +4,10 @@ import { api } from "~/utils/api";
 
 import "~/styles/globals.css";
 import "@mantine/core/styles.css";
+import "@mantine/notifications/styles.css";
 
 import { MantineProvider, createTheme } from "@mantine/core";
+import { Notifications } from "@mantine/notifications";
 
 import Layout from "~/components/layout";
 
@@ -31,6 +33,7 @@ const theme = createTheme({
 const MyApp: AppType = ({ Component, pageProps }) => {
   return (
     <MantineProvider defaultColorScheme="dark" theme={theme}>
+      <Notifications position="top-left" />
       <Layout>
         <Component {...pageProps} />
       </Layout>
