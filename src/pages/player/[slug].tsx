@@ -1,10 +1,19 @@
 import { Loader } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 import { api } from "~/utils/api";
 
-export default function Player() {
+const Player = () => {
+  const [steamUsername, setSteamUsername] = useState<string>();
   const router = useRouter();
+
+  useEffect(() => {
+    if (router.isReady) {
+      setSteamUsername(router.query.slug?.toString() ?? "");
+    }
+  }, [router.isReady, router.query.slug]);
+
   const {
     data: steamId,
     error,
@@ -13,10 +22,13 @@ export default function Player() {
     isSuccess,
   } = api.player.findProfile.useQuery(
     {
-      steamUsername: router.query.slug?.toString() ?? "",
+      steamUsername: steamUsername ?? "",
     },
     {
+      enabled: !!steamUsername,
       retry: false,
+      refetchOnWindowFocus: false,
+      refetchOnMount: true,
     },
   );
 
@@ -35,4 +47,6 @@ export default function Player() {
       {isSuccess && <p>Steam ID: {steamId}</p>}
     </>
   );
-}
+};
+
+export default Player;
