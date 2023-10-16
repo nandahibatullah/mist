@@ -52,3 +52,11 @@ export const PlayerSummariesResponseSchema = z.object({
     ),
   }),
 });
+
+export const ResolveVanityURLResponseSchema = z.object({
+  response: z.object({
+    steamid: z.string().optional(),
+    success: z.number(),
+    message: z.string().optional(),
+  }),
+});

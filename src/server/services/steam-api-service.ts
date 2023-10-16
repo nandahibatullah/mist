@@ -4,6 +4,7 @@ import { URL, URLSearchParams } from "url";
 import {
   OwnedGamesResponseSchema,
   PlayerSummariesResponseSchema,
+  ResolveVanityURLResponseSchema,
 } from "../schemas/steam-api";
 
 export const STEAM_WEB_API_URL = "https://api.steampowered.com";
@@ -36,7 +37,7 @@ export default class SteamAPIService {
     if (response.status !== 200) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
-        message: `Failed to fetch steam data. Status code: ${response.status} returned.`,
+        message: `Failed to fetch Steam data. Status code: ${response.status} returned.`,
       });
     }
 
@@ -69,7 +70,7 @@ export default class SteamAPIService {
     if (response.status !== 200) {
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
-        message: `Failed to fetch steam data. Status code: ${response.status} returned.`,
+        message: `Failed to fetch Steam data. Status code: ${response.status} returned.`,
       });
     }
 
@@ -78,5 +79,44 @@ export default class SteamAPIService {
     );
 
     return responseData.response;
+  }
+
+  public async findSteamId(steamUsername: string) {
+    const resolveVanityUrlEndpoint = new URL(
+      `${STEAM_WEB_API_URL}/ISteamUser/ResolveVanityURL/v1`,
+    );
+    const queryParams = {
+      key: this.steamApiKey,
+      vanityurl: steamUsername,
+      format: "json",
+    };
+
+    resolveVanityUrlEndpoint.search = new URLSearchParams(
+      queryParams,
+    ).toString();
+
+    const response = await fetch(resolveVanityUrlEndpoint, {
+      method: "GET",
+    });
+
+    if (response.status !== 200) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: `Failed to fetch Steam data. Status code: ${response.status} returned.`,
+      });
+    }
+
+    const responseData = ResolveVanityURLResponseSchema.parse(
+      await response.json(),
+    );
+
+    if (!responseData.response.steamid) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: `Failed to find Steam profile for: ${steamUsername}`,
+      });
+    }
+
+    return responseData.response.steamid;
   }
 }

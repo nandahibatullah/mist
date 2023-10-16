@@ -6,6 +6,7 @@
     "cityid",
     "commentpermission",
     "communityvisibilitystate",
+    "extrabold",
     "gameextrainfo",
     "gameid",
     "gameserverip",
@@ -22,7 +23,8 @@
     "rtime",
     "steamid",
     "steamids",
-    "timecreated"
+    "timecreated",
+    "vanityurl"
   ],
   "editor.defaultFormatter": "esbenp.prettier-vscode"
 }
