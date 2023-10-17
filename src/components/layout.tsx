@@ -4,7 +4,7 @@ const Layout = ({ children }: { children: JSX.Element }) => {
   return (
     <>
       <Head>
-        <title>MIST | Steam Profile Analysis</title>
+        <title>MIST | My Immediate Steam Tracker</title>
         <meta name="description" content="My Immediate Steam Tracker" />
         <meta name="referrer" content="no-referrer" />
         <link rel="icon" href="/favicon.ico" />
