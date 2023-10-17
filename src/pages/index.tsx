@@ -28,7 +28,7 @@ export default function Home() {
   };
 
   return (
-    <>
+    <div className="container flex min-h-screen flex-col items-center justify-center gap-12 px-4 py-16 ">
       <h1 className="text-5xl font-extrabold tracking-tight text-white sm:text-[5rem]">
         <div className="grid grid-flow-col content-end items-center gap-2">
           <Logo height={64} width={64} />
@@ -53,6 +53,6 @@ export default function Home() {
           </Button>
         </Stack>
       </form>
-    </>
+    </div>
   );
 }
