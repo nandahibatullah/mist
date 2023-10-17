@@ -41,23 +41,34 @@ export default class PlayerService {
       (a, b) => b.playtime_forever - a.playtime_forever,
     );
 
+    const formattedSortedGamesByPlaytime = sortedGamesByPlaytime.map((game) => {
+      const recentPlaytimeInHours = (game.playtime_forever / 60).toFixed(1);
+      return {
+        appId: game.appid,
+        name: game.name,
+        playTime: Number(recentPlaytimeInHours),
+      };
+    });
+
     return {
       playerInfo: {
         avatarURL: playerInfo.avatarfull,
         username: playerInfo.personaname,
         steamProfileURL: playerInfo.profileurl,
         numberOfGames: libraryInfo.game_count,
-        totalPlayTime: this.calculateEntireLibraryPlaytime(libraryInfo.games),
-        mostPlayedGame: this.findMostPlayedGame(libraryInfo.games),
+        totalPlayTime: this.calculateEntireLibraryPlaytime(
+          formattedSortedGamesByPlaytime,
+        ),
+        mostPlayedGame: this.findMostPlayedGame(formattedSortedGamesByPlaytime),
         recentlyPlayedGames: formattedRecentlyPlayedGames,
-        games: sortedGamesByPlaytime,
+        games: formattedSortedGamesByPlaytime,
       },
     };
   }
 
   private calculateEntireLibraryPlaytime(games: SteamGame[]) {
     const playtimeMinutes = games.reduce(
-      (accumulator, currentGame) => currentGame.playtime_forever + accumulator,
+      (accumulator, currentGame) => currentGame.playTime + accumulator,
       0,
     );
 
@@ -66,9 +77,7 @@ export default class PlayerService {
 
   private findMostPlayedGame(games: SteamGame[]) {
     const mostPlayedGame = games.reduce((mostPlayed, currentGame) =>
-      mostPlayed.playtime_forever > currentGame.playtime_forever
-        ? mostPlayed
-        : currentGame,
+      mostPlayed.playTime > currentGame.playTime ? mostPlayed : currentGame,
     );
 
     return mostPlayedGame;

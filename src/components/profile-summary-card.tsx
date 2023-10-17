@@ -61,7 +61,7 @@ export const ProfileSummaryCard = ({
           <Card.Section>
             <Image
               alt="game-icon"
-              src={gameIconResolver(playerInfo.mostPlayedGame.appid)}
+              src={gameIconResolver(playerInfo.mostPlayedGame.appId)}
               className="relative top-[-1px]"
             />
           </Card.Section>

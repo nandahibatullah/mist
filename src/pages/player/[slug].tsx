@@ -85,7 +85,7 @@ const LibraryDisplay = ({ games }: { games: SteamGame[] }) => {
         <Title>Library</Title>
       </Group>
       {paginatedGames.map((game) => (
-        <GameLibraryCard key={game.appid} game={game} />
+        <GameLibraryCard key={game.appId} game={game} />
       ))}
 
       <Center className="col-span-3 py-4 lg:col-span-8">
