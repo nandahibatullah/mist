@@ -1,0 +1,41 @@
+name: Setup dependencies
+description: Install Node, pnpm, and package dependencies for the project
+inputs:
+  runner-os:
+    required: true
+    description: "The OS of the GitHub Actions runner"
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-node@v3
+      with:
+        node-version-file: ".node-version"
+
+    - uses: pnpm/action-setup@v2
+      id: pnpm-install
+      with:
+        version: 8.6.12
+        run_install: false
+
+    - name: Get pnpm store directory
+      id: pnpm-cache
+      shell: bash
+      run: |
+        echo "store-path=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+    - name: Get Node version
+      id: node-version
+      shell: bash
+      run: |
+        echo "node-version=$(cat .node-version)" >> $GITHUB_OUTPUT
+
+    - uses: actions/cache@v3
+      with:
+        path: ${{ steps.pnpm-cache.outputs.store-path }}
+        key: ${{ inputs.runner-os }}-pnpm-store-node-${{ steps.node-version.outputs.node-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ inputs.runner-os }}-pnpm-store-node-${{ steps.node-version.outputs.node-version }}-
+
+    - name: Install dependencies
+      shell: bash
+      run: pnpm install

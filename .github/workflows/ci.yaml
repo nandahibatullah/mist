@@ -1,0 +1,57 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize]
+  workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Linting
+    if: ${{ github.event_name == 'pull_request' }}
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup dependencies
+        uses: ./.github/actions/setup-dependencies
+        with:
+          runner-os: ${{ runner.os }}
+
+      - name: Fetch through merge-base (to lint changes only)
+        uses: rmacklin/fetch-through-merge-base@v0
+        with:
+          base_ref: ${{ github.event.pull_request.base.sha }}
+          head_ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Set merge-base environment variable (to lint changes only)
+        run: echo "ESLINT_PLUGIN_DIFF_COMMIT=$(git merge-base ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }})" >> "$GITHUB_ENV"
+
+      - name: Lint (changes only)
+        run: pnpm lint
+
+  test:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup dependencies
+        uses: ./.github/actions/setup-dependencies
+        with:
+          runner-os: ${{ runner.os }}
+
+      - name: Run unit tests
+        run: |
+          pnpm test
