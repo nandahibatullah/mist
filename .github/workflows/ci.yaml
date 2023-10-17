@@ -1,5 +1,8 @@
 name: Continuous Integration
 
+env:
+  STEAM_API_KEY: ${{ secrets.STEAM_API_KEY }}
+
 on:
   push:
     branches:

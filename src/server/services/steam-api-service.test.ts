@@ -131,7 +131,7 @@ describe("SteamAPIService", () => {
 
         await expect(() =>
           service.getOwnedGames("not-correct-id"),
-        ).rejects.toThrow(/Failed to fetch steam data/);
+        ).rejects.toThrow(/Failed to fetch Steam data/);
       });
     });
   });
@@ -183,7 +183,7 @@ describe("SteamAPIService", () => {
 
         await expect(() =>
           service.getOwnedGames("not-correct-id"),
-        ).rejects.toThrow(/Failed to fetch steam data/);
+        ).rejects.toThrow(/Failed to fetch Steam data/);
       });
     });
   });
