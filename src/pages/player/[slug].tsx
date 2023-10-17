@@ -122,6 +122,7 @@ const PlayerPage = (
           </UnstyledButton>
         </Link>
         {!!isSummarySuccess && (
+          <Link href={`https://steamcommunity.com/profiles/${props.steamId}`}>
           <Stack align="center" gap="xs ">
             <Image
               className="border-4 border-zinc-700 hover:scale-110"
@@ -136,11 +137,12 @@ const PlayerPage = (
               {playerSummary?.playerInfo.username}
             </p>
           </Stack>
+          </Link>
         )}
       </div>
       {!!isSummarySuccess && (
         <div className="container w-full">
-          <div className="grid grid-cols-1 grid-rows-2 gap-4 md:grid-cols-2 md:grid-rows-1">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <ProfileSummaryCard playerInfo={playerSummary.playerInfo} />
             <Card shadow="sm" padding="sm" radius="md"></Card>
           </div>
