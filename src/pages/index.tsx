@@ -1,6 +1,8 @@
 import { Button, TextInput, Text, Stack } from "@mantine/core";
 import { useForm, zodResolver } from "@mantine/form";
+import { notifications } from "@mantine/notifications";
 import { useRouter } from "next/router";
+import { useEffect } from "react";
 
 import { z } from "zod";
 import Logo from "~/components/logo";
@@ -21,6 +23,17 @@ export default function Home() {
     },
   });
   const router = useRouter();
+
+  useEffect(() => {
+    if (router.query?.error === "not-found") {
+      notifications.show({
+        title: "Steam profile not found",
+        message: "Failed loading user",
+        color: "red",
+      });
+      void router.push("/");
+    }
+  });
 
   const handleSubmit = (data: SteamInfoFormData) => {
     console.log(data.steamUsername);

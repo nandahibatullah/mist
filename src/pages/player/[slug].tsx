@@ -1,79 +1,70 @@
+import { Group, Stack, Image, Text, UnstyledButton, Card } from "@mantine/core";
 import {
-  Group,
-  Stack,
-  Image,
-  Text,
-  UnstyledButton,
-  Card,
-  Loader,
-  Center,
-} from "@mantine/core";
-import { notifications } from "@mantine/notifications";
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+  type GetServerSidePropsContext,
+  type InferGetServerSidePropsType,
+} from "next";
+import superjson from "superjson";
+import { createServerSideHelpers } from "@trpc/react-query/server";
 import Logo from "~/components/logo";
 import { api } from "~/utils/api";
+import { appRouter } from "~/server/api/root";
+
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext<{ slug: string }>,
+) => {
+  const helpers = createServerSideHelpers({
+    router: appRouter,
+    ctx: {},
+    transformer: superjson,
+  });
+
+  const slug = context.params?.slug ?? "";
+
+  try {
+    const steamId = await helpers.player.findProfile.fetch({
+      steamUsername: slug,
+    });
+
+    await helpers.player.summary.prefetch({ steamId });
+
+    return {
+      props: {
+        trpcState: helpers.dehydrate(),
+        steamId,
+      },
+    };
+  } catch (error) {
+    return {
+      redirect: {
+        permanent: false,
+        destination: "/?error=not-found",
+      },
+    };
+  }
+};
 
 const gameIconResolver = (appId: number) => {
   return `https://cdn.akamai.steamstatic.com/steam/apps/${appId}/header.jpg`;
 };
 
-const Player = () => {
-  const [steamUsername, setSteamUsername] = useState<string>();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (router.isReady) {
-      setSteamUsername(router.query.slug?.toString() ?? "");
-    }
-  }, [router.isReady, router.query.slug]);
-
-  const {
-    data: steamId,
-    error: steamIdError,
-    isLoading: isSteamIdLoading,
-    isError: isSteamIdError,
-    isSuccess: isSteamIdSuccess,
-  } = api.player.findProfile.useQuery(
-    {
-      steamUsername: steamUsername ?? "",
-    },
-    {
-      enabled: !!steamUsername,
-      retry: false,
-      refetchOnWindowFocus: false,
-      refetchOnMount: true,
-    },
-  );
-
-  const {
-    data: playerSummary,
-    isLoading: isSummaryLoading,
-    isSuccess: isSummarySuccess,
-  } = api.player.summary.useQuery(
-    { steamId: steamId ?? "" },
-    {
-      enabled: !!isSteamIdSuccess,
-      retry: false,
-      refetchOnWindowFocus: false,
-      refetchOnMount: true,
-    },
-  );
-
-  if (isSteamIdError) {
-    void router.push("/");
-    notifications.show({
-      title: "Steam profile not found",
-      message: steamIdError.message,
-      color: "red",
-    });
-  }
+const PlayerPage = (
+  props: InferGetServerSidePropsType<typeof getServerSideProps>,
+) => {
+  const { data: playerSummary, isSuccess: isSummarySuccess } =
+    api.player.summary.useQuery(
+      { steamId: props.steamId },
+      {
+        retry: false,
+        refetchOnWindowFocus: false,
+        refetchOnMount: true,
+      },
+    );
 
   return (
     <div className="container flex flex-col items-center justify-center">
       <div className="flex h-32 w-full items-center justify-between px-4">
-        <UnstyledButton>
-          <div className="grid grid-flow-col items-center gap-2">
+        <UnstyledButton className="bg rounded-lg hover:scale-110">
+          <div className="grid grid-flow-col items-center gap-2 px-4 py-4">
             <Logo height={48} width={48} />
             <p className="font-extrabold tracking-tight text-white sm:text-[4rem]">
               MIST
@@ -83,7 +74,7 @@ const Player = () => {
         <Stack align="center" gap="xs ">
           {!!isSummarySuccess && (
             <Image
-              className="border-4 border-zinc-700"
+              className="border-4 border-zinc-700 hover:scale-110"
               fallbackSrc="https://placehold.co/600x400?text=Placeholder"
               src={playerSummary?.playerInfo.avatarURL}
               alt="player-avatar"
@@ -97,11 +88,6 @@ const Player = () => {
           </p>
         </Stack>
       </div>
-      {(!!isSteamIdLoading || !!isSummaryLoading) && (
-        <Center>
-          <Loader />
-        </Center>
-      )}
       {!!isSummarySuccess && (
         <>
           <div className="grid grid-cols-2 grid-rows-1 gap-4">
@@ -112,7 +98,7 @@ const Player = () => {
               <div className="grid gap-4 px-4 py-4 lg:grid-cols-3">
                 <Card
                   style={{ backgroundColor: "#ffc438", color: "black" }}
-                  className="justify-center"
+                  className="justify-center hover:scale-105"
                 >
                   <Stack gap={1} align="center">
                     <p className="font-extrabold lg:text-[1.5rem]">
@@ -125,7 +111,7 @@ const Player = () => {
                 </Card>
                 <Card
                   style={{ backgroundColor: "#ffc438", color: "black" }}
-                  className="justify-center"
+                  className="justify-center hover:scale-105"
                 >
                   <Stack gap={1} align="center">
                     <p className="text-center font-extrabold lg:text-[1.5rem]">
@@ -138,7 +124,7 @@ const Player = () => {
                 </Card>
                 <Card
                   style={{ backgroundColor: "#ffc438", color: "black" }}
-                  className="justify-center"
+                  className="justify-center hover:scale-105"
                   padding={"lg"}
                 >
                   <Card.Section>
@@ -166,4 +152,4 @@ const Player = () => {
   );
 };
 
-export default Player;
+export default PlayerPage;
