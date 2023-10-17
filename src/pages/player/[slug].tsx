@@ -3,7 +3,6 @@ import {
   Stack,
   Image,
   UnstyledButton,
-  Card,
   Title,
   Pagination,
   Center,
@@ -24,6 +23,7 @@ import { ProfileSummaryCard } from "../../components/profile-summary-card";
 import { type SteamGame } from "~/types";
 import { useMediaQuery } from "@mantine/hooks";
 import { NamedLogo } from "~/components/named-logo";
+import { RecentlyPlayedCard } from "~/components/recently-played-card";
 
 export const getServerSideProps = async (
   context: GetServerSidePropsContext<{ slug: string }>,
@@ -123,20 +123,20 @@ const PlayerPage = (
         </Link>
         {!!isSummarySuccess && (
           <Link href={`https://steamcommunity.com/profiles/${props.steamId}`}>
-          <Stack align="center" gap="xs ">
-            <Image
-              className="border-4 border-zinc-700 hover:scale-110"
-              fallbackSrc="https://placehold.co/600x400?text=Placeholder"
-              src={playerSummary.playerInfo.avatarURL}
-              alt="player-avatar"
-              radius="lg"
-              h={64}
-              w={64}
-            />
-            <p className="font-extrabold text-white">
-              {playerSummary?.playerInfo.username}
-            </p>
-          </Stack>
+            <Stack align="center" gap="xs ">
+              <Image
+                className="border-4 border-zinc-700 hover:scale-110"
+                fallbackSrc="https://placehold.co/600x400?text=Placeholder"
+                src={playerSummary.playerInfo.avatarURL}
+                alt="player-avatar"
+                radius="lg"
+                h={64}
+                w={64}
+              />
+              <p className="font-extrabold text-white">
+                {playerSummary?.playerInfo.username}
+              </p>
+            </Stack>
           </Link>
         )}
       </div>
@@ -144,7 +144,9 @@ const PlayerPage = (
         <div className="container w-full">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <ProfileSummaryCard playerInfo={playerSummary.playerInfo} />
-            <Card shadow="sm" padding="sm" radius="md"></Card>
+            <RecentlyPlayedCard
+              recentlyPlayedGames={playerSummary.playerInfo.recentlyPlayedGames}
+            />
           </div>
           <LibraryDisplay games={playerSummary.playerInfo.games} />
         </div>

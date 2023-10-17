@@ -4,6 +4,7 @@ import { URL, URLSearchParams } from "url";
 import {
   OwnedGamesResponseSchema,
   PlayerSummariesResponseSchema,
+  RecentlyPlayedGamesResponseSchema,
   ResolveVanityURLResponseSchema,
 } from "../schemas/steam-api";
 
@@ -118,5 +119,39 @@ export default class SteamAPIService {
     }
 
     return responseData.response.steamid;
+  }
+
+  /**
+   * docs: https://developer.valvesoftware.com/wiki/Steam_Web_API#GetRecentlyPlayedGames_.28v0001.29
+   */
+  public async fetchRecentlyPlayed(steamId: string) {
+    const recentlyPlayedEndpoint = new URL(
+      `${STEAM_WEB_API_URL}/IPlayerService/GetRecentlyPlayedGames/v0001`,
+    );
+    const queryParams = {
+      key: this.steamApiKey,
+      steamid: steamId,
+      count: "3",
+      format: "json",
+    };
+
+    recentlyPlayedEndpoint.search = new URLSearchParams(queryParams).toString();
+
+    const response = await fetch(recentlyPlayedEndpoint, {
+      method: "GET",
+    });
+
+    if (response.status !== 200) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: `Failed to fetch Steam data. Status code: ${response.status} returned.`,
+      });
+    }
+
+    const responseData = RecentlyPlayedGamesResponseSchema.parse(
+      await response.json(),
+    );
+
+    return responseData.response;
   }
 }

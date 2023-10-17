@@ -13,7 +13,6 @@ export default class PlayerService {
     const playerSummaries = await this.steamService.getPlayerSummaries([
       steamUserId,
     ]);
-    const libraryInfo = await this.steamService.getOwnedGames(steamUserId);
     const playerInfo = playerSummaries.players[0];
 
     if (!playerInfo) {
@@ -23,6 +22,25 @@ export default class PlayerService {
       });
     }
 
+    const libraryInfo = await this.steamService.getOwnedGames(steamUserId);
+    const recentlyPlayedGames = await this.steamService.fetchRecentlyPlayed(
+      steamUserId,
+    );
+    const formattedRecentlyPlayedGames = recentlyPlayedGames.games.map(
+      (game) => {
+        const recentPlaytimeInHours = (game.playtime_2weeks / 60).toFixed(1);
+        return {
+          appId: game.appid,
+          name: game.name,
+          recentPlayTime: recentPlaytimeInHours,
+        };
+      },
+    );
+
+    const sortedGamesByPlaytime = libraryInfo.games.sort(
+      (a, b) => b.playtime_forever - a.playtime_forever,
+    );
+
     return {
       playerInfo: {
         avatarURL: playerInfo.avatarfull,
@@ -31,7 +49,8 @@ export default class PlayerService {
         numberOfGames: libraryInfo.game_count,
         totalPlayTime: this.calculateEntireLibraryPlaytime(libraryInfo.games),
         mostPlayedGame: this.findMostPlayedGame(libraryInfo.games),
-        games: libraryInfo.games,
+        recentlyPlayedGames: formattedRecentlyPlayedGames,
+        games: sortedGamesByPlaytime,
       },
     };
   }
