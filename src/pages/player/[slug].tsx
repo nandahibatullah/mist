@@ -1,13 +1,29 @@
-import { Group, Stack, Image, Text, UnstyledButton, Card } from "@mantine/core";
+import {
+  Group,
+  Stack,
+  Image,
+  UnstyledButton,
+  Card,
+  Title,
+  Pagination,
+  Center,
+  em,
+} from "@mantine/core";
 import {
   type GetServerSidePropsContext,
   type InferGetServerSidePropsType,
 } from "next";
 import superjson from "superjson";
 import { createServerSideHelpers } from "@trpc/react-query/server";
-import Logo from "~/components/logo";
 import { api } from "~/utils/api";
 import { appRouter } from "~/server/api/root";
+import { useState } from "react";
+import Link from "next/link";
+import { GameLibraryCard } from "~/components/game-library-card";
+import { ProfileSummaryCard } from "../../components/profile-summary-card";
+import { type SteamGame } from "~/types";
+import { useMediaQuery } from "@mantine/hooks";
+import { NamedLogo } from "~/components/named-logo";
 
 export const getServerSideProps = async (
   context: GetServerSidePropsContext<{ slug: string }>,
@@ -43,8 +59,45 @@ export const getServerSideProps = async (
   }
 };
 
-const gameIconResolver = (appId: number) => {
-  return `https://cdn.akamai.steamstatic.com/steam/apps/${appId}/header.jpg`;
+const LibraryDisplay = ({ games }: { games: SteamGame[] }) => {
+  const [activePage, setPage] = useState(1);
+  const isMobile = useMediaQuery(`(max-width: ${em(900)})`);
+  const columns = isMobile ? 3 : 8; // matches col number in grid
+  const paginationControllerSize = isMobile ? "sm" : "md";
+  const GamesPerPage = columns * 5;
+  const totalPages = Math.ceil(games.length / GamesPerPage);
+  /**
+   * - 1 to active page because indexes start at 0 but pagination at 1.
+   * In desktop view:
+   * page 1 values should be (0, 40)
+   * page 2 values should be (40, 80)
+   * ...
+   * page 4 values should be (120, 160)
+   * */
+  const pageStart = (activePage - 1) * GamesPerPage;
+  const pageEnd = activePage * GamesPerPage;
+
+  const paginatedGames = games.slice(pageStart, pageEnd);
+
+  return (
+    <div className="grid grid-cols-3 gap-3 py-4 lg:grid-cols-8">
+      <Group justify="stat" className="col-span-3 lg:col-span-8">
+        <Title>Library</Title>
+      </Group>
+      {paginatedGames.map((game) => (
+        <GameLibraryCard key={game.appid} game={game} />
+      ))}
+
+      <Center className="col-span-3 py-4 lg:col-span-8">
+        <Pagination
+          size={paginationControllerSize}
+          total={totalPages}
+          onChange={setPage}
+          withEdges
+        />
+      </Center>
+    </div>
+  );
 };
 
 const PlayerPage = (
@@ -63,90 +116,36 @@ const PlayerPage = (
   return (
     <div className="container flex flex-col items-center justify-center">
       <div className="flex h-32 w-full items-center justify-between px-4">
-        <UnstyledButton className="bg rounded-lg hover:scale-110">
-          <div className="grid grid-flow-col items-center gap-2 px-4 py-4">
-            <Logo height={48} width={48} />
-            <p className="font-extrabold tracking-tight text-white sm:text-[4rem]">
-              MIST
-            </p>
-          </div>
-        </UnstyledButton>
-        <Stack align="center" gap="xs ">
-          {!!isSummarySuccess && (
+        <Link href="/">
+          <UnstyledButton className="bg rounded-lg hover:scale-110">
+            <NamedLogo />
+          </UnstyledButton>
+        </Link>
+        {!!isSummarySuccess && (
+          <Stack align="center" gap="xs ">
             <Image
               className="border-4 border-zinc-700 hover:scale-110"
               fallbackSrc="https://placehold.co/600x400?text=Placeholder"
-              src={playerSummary?.playerInfo.avatarURL}
+              src={playerSummary.playerInfo.avatarURL}
               alt="player-avatar"
               radius="lg"
               h={64}
               w={64}
             />
-          )}
-          <p className="font-extrabold text-white">
-            {playerSummary?.playerInfo.username}
-          </p>
-        </Stack>
+            <p className="font-extrabold text-white">
+              {playerSummary?.playerInfo.username}
+            </p>
+          </Stack>
+        )}
       </div>
       {!!isSummarySuccess && (
-        <>
-          <div className="grid grid-cols-2 grid-rows-1 gap-4">
-            <Card shadow="sm" padding="sm" radius="md">
-              <Group justify="center" py="xs">
-                <Text fw={500}>Profile Summary</Text>
-              </Group>
-              <div className="grid gap-4 px-4 py-4 lg:grid-cols-3">
-                <Card
-                  style={{ backgroundColor: "#ffc438", color: "black" }}
-                  className="justify-center hover:scale-105"
-                >
-                  <Stack gap={1} align="center">
-                    <p className="font-extrabold lg:text-[1.5rem]">
-                      {playerSummary?.playerInfo.numberOfGames}
-                    </p>
-                    <Text className="text-center" size="sm">
-                      Games Owned
-                    </Text>
-                  </Stack>
-                </Card>
-                <Card
-                  style={{ backgroundColor: "#ffc438", color: "black" }}
-                  className="justify-center hover:scale-105"
-                >
-                  <Stack gap={1} align="center">
-                    <p className="text-center font-extrabold lg:text-[1.5rem]">
-                      {playerSummary?.playerInfo.totalPlayTime} hours
-                    </p>
-                    <Text className="text-center" size="sm">
-                      Total Steam Playtime
-                    </Text>
-                  </Stack>
-                </Card>
-                <Card
-                  style={{ backgroundColor: "#ffc438", color: "black" }}
-                  className="justify-center hover:scale-105"
-                  padding={"lg"}
-                >
-                  <Card.Section>
-                    <Image
-                      alt="game-icon"
-                      src={gameIconResolver(
-                        playerSummary.playerInfo.mostPlayedGame.appid,
-                      )}
-                    />
-                  </Card.Section>
-                  <Stack gap={1} align="center">
-                    <p className="break-word text-center font-extrabold lg:text-[1.25em]">
-                      {playerSummary?.playerInfo.mostPlayedGame.name}
-                    </p>
-                    <Text size="sm">Most played</Text>
-                  </Stack>
-                </Card>
-              </div>
-            </Card>
+        <div className="container w-full">
+          <div className="grid grid-cols-1 grid-rows-2 gap-4 md:grid-cols-2 md:grid-rows-1">
+            <ProfileSummaryCard playerInfo={playerSummary.playerInfo} />
             <Card shadow="sm" padding="sm" radius="md"></Card>
           </div>
-        </>
+          <LibraryDisplay games={playerSummary.playerInfo.games} />
+        </div>
       )}
     </div>
   );

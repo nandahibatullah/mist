@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 import { useEffect } from "react";
 
 import { z } from "zod";
-import Logo from "~/components/logo";
+import { NamedLogo } from "../components/named-logo";
 
 const steamInfoSchema = z.object({
   steamUsername: z
@@ -43,12 +43,8 @@ export default function Home() {
   return (
     <div className="container flex min-h-screen flex-col items-center justify-center gap-12 px-4 py-16 ">
       <h1 className="text-5xl font-extrabold tracking-tight text-white sm:text-[5rem]">
-        <div className="grid grid-flow-col content-end items-center gap-2">
-          <Logo height={64} width={64} />
-          <span className="text-white">MIST</span>
-        </div>
+        <NamedLogo />
       </h1>
-
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <Stack>
           <TextInput

@@ -1,9 +1,6 @@
 import { TRPCError } from "@trpc/server";
-import { type z } from "zod";
 import SteamAPIService from "./steam-api-service";
-import { type OwnedGamesResponseSchema } from "../schemas/steam-api";
-
-type Games = z.infer<typeof OwnedGamesResponseSchema>["response"]["games"];
+import { type SteamGame } from "~/types";
 
 export default class PlayerService {
   private readonly steamService: SteamAPIService;
@@ -39,7 +36,7 @@ export default class PlayerService {
     };
   }
 
-  private calculateEntireLibraryPlaytime(games: Games) {
+  private calculateEntireLibraryPlaytime(games: SteamGame[]) {
     const playtimeMinutes = games.reduce(
       (accumulator, currentGame) => currentGame.playtime_forever + accumulator,
       0,
@@ -48,7 +45,7 @@ export default class PlayerService {
     return (playtimeMinutes / 60).toFixed(1);
   }
 
-  private findMostPlayedGame(games: Games) {
+  private findMostPlayedGame(games: SteamGame[]) {
     const mostPlayedGame = games.reduce((mostPlayed, currentGame) =>
       mostPlayed.playtime_forever > currentGame.playtime_forever
         ? mostPlayed
