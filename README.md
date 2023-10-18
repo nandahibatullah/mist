@@ -2,6 +2,9 @@
 
 This is dashboard app to see an overview of your steam library.
 See your total hours played on Steam, top games, and your entire game library.
+
+Check it out here! https://mist.nandahibatullah.dev/
+
 ![image](/docs/Screenshot.png)
 
 ## Running locally
