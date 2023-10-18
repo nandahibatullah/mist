@@ -1,7 +1,7 @@
 name: Continuous Integration
 
 env:
-  STEAM_API_KEY: ${{ secrets.STEAM_API_KEY }}
+  SKIP_ENV_VALIDATION: true
 
 on:
   push:

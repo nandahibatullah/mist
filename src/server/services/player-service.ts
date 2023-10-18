@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import SteamAPIService from "./steam-api-service";
-import { type SteamGame } from "~/types";
+import { type GetOwnedGamesResponse, type SteamGame } from "~/types";
 
 export default class PlayerService {
   private readonly steamService: SteamAPIService;
@@ -41,14 +41,9 @@ export default class PlayerService {
       (a, b) => b.playtime_forever - a.playtime_forever,
     );
 
-    const formattedSortedGamesByPlaytime = sortedGamesByPlaytime.map((game) => {
-      const recentPlaytimeInHours = (game.playtime_forever / 60).toFixed(1);
-      return {
-        appId: game.appid,
-        name: game.name,
-        playTime: Number(recentPlaytimeInHours),
-      };
-    });
+    const formattedSortedGamesByPlaytime = sortedGamesByPlaytime.map((game) =>
+      this.formatSteamGame(game),
+    );
 
     return {
       playerInfo: {
@@ -67,12 +62,14 @@ export default class PlayerService {
   }
 
   private calculateEntireLibraryPlaytime(games: SteamGame[]) {
-    const playtimeMinutes = games.reduce(
-      (accumulator, currentGame) => currentGame.playTime + accumulator,
-      0,
-    );
+    const totalPlayTime = games
+      .reduce(
+        (accumulator, currentGame) => currentGame.playTime + accumulator,
+        0,
+      )
+      .toFixed(1);
 
-    return (playtimeMinutes / 60).toFixed(1);
+    return totalPlayTime;
   }
 
   private findMostPlayedGame(games: SteamGame[]) {
@@ -81,5 +78,14 @@ export default class PlayerService {
     );
 
     return mostPlayedGame;
+  }
+
+  private formatSteamGame(game: GetOwnedGamesResponse["response"]["games"][0]) {
+    const playTime = (game.playtime_forever / 60).toFixed(1);
+    return {
+      appId: game.appid,
+      name: game.name,
+      playTime: Number(playTime),
+    };
   }
 }
