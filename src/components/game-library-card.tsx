@@ -1,6 +1,7 @@
-import { Group, Image, Text, Card } from "@mantine/core";
+import { Group, Text, Card } from "@mantine/core";
 import { IconClockPlay } from "@tabler/icons-react";
 import Link from "next/link";
+import Image from "next/image";
 import { type SteamGame } from "~/types";
 
 const steamGameIconResolver = (appId: number) => {
@@ -22,7 +23,11 @@ export const GameLibraryCard = ({ game }: { game: SteamGame }) => {
           <Image
             alt="game-icon"
             src={steamGameIconResolver(game.appId)}
-            fallbackSrc={fallBackImageUrl}
+            width={182}
+            height={85}
+            placeholder="blur"
+            blurDataURL={fallBackImageUrl}
+            priority
           />
         </Card.Section>
         <Group justify="center" className="pt-2 text-center">
