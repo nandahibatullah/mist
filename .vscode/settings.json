@@ -25,6 +25,7 @@
     "steamids",
     "superjson",
     "timecreated",
+    "upstash",
     "vanityurl"
   ],
   "editor.defaultFormatter": "esbenp.prettier-vscode"
