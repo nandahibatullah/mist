@@ -24,6 +24,8 @@ import { type SteamGame } from "~/types";
 import { useMediaQuery } from "@mantine/hooks";
 import { NamedLogo } from "~/components/named-logo";
 import { RecentlyPlayedCard } from "~/components/recently-played-card";
+import { notifications } from "@mantine/notifications";
+import { useRouter } from "next/router";
 
 export const getServerSideProps = async (
   context: GetServerSidePropsContext<{ slug: string }>,
@@ -37,9 +39,13 @@ export const getServerSideProps = async (
   const slug = context.params?.slug ?? "";
 
   try {
-    const steamId = await helpers.player.findProfile.fetch({
-      steamUsername: slug,
-    });
+    const slugIsSteamId = !isNaN(Number(slug));
+
+    const steamId = slugIsSteamId
+      ? slug
+      : await helpers.player.findProfile.fetch({
+          steamUsername: slug,
+        });
 
     await helpers.player.summary.prefetch({ steamId });
 
@@ -103,6 +109,7 @@ const LibraryDisplay = ({ games }: { games: SteamGame[] }) => {
 const PlayerPage = (
   props: InferGetServerSidePropsType<typeof getServerSideProps>,
 ) => {
+  const router = useRouter();
   const { data: playerSummary, isSuccess: isSummarySuccess } =
     api.player.summary.useQuery(
       { steamId: props.steamId },
@@ -110,6 +117,15 @@ const PlayerPage = (
         retry: false,
         refetchOnWindowFocus: false,
         refetchOnMount: true,
+        onError: () => {
+          notifications.show({
+            title: "Steam profile not found",
+            message: "Failed loading user",
+            color: "red",
+            autoClose: 6000,
+          });
+          void router.push("/");
+        },
       },
     );
 

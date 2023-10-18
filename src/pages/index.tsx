@@ -1,4 +1,11 @@
-import { Button, TextInput, Text, Stack } from "@mantine/core";
+import {
+  Button,
+  TextInput,
+  Text,
+  Stack,
+  Group,
+  HoverCard,
+} from "@mantine/core";
 import { useForm, zodResolver } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { useRouter } from "next/router";
@@ -6,6 +13,8 @@ import { useEffect } from "react";
 
 import { z } from "zod";
 import { NamedLogo } from "../components/named-logo";
+import { IconInfoCircle } from "@tabler/icons-react";
+import Link from "next/link";
 
 const steamInfoSchema = z.object({
   steamUsername: z
@@ -48,7 +57,28 @@ export default function Home() {
       <form onSubmit={form.onSubmit(handleSubmit)}>
         <Stack>
           <TextInput
-            label="Steam Username"
+            label={
+              <Group justify="center" className="items-center pb-2">
+                <Text>Steam Username | Steam ID</Text>
+                <HoverCard width={280} shadow="md" withArrow position="right">
+                  <HoverCard.Target>
+                    <IconInfoCircle />
+                  </HoverCard.Target>
+                  <HoverCard.Dropdown className="items-center">
+                    <Text size="sm">
+                      Click
+                      <Link
+                        className="font-extrabold"
+                        href="https://help.steampowered.com/en/faqs/view/2816-BE67-5B69-0FEC"
+                      >
+                        {" here "}
+                      </Link>
+                      for more information.
+                    </Text>
+                  </HoverCard.Dropdown>
+                </HoverCard>
+              </Group>
+            }
             {...form.getInputProps("steamUsername")}
           />
           <Button
