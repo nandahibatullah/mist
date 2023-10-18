@@ -158,6 +158,7 @@ describe("SteamAPIService", () => {
 
     describe("when the params aren't correct", () => {
       test("throws an error", async () => {
+        mockRedisCacheEmpty();
         vi.spyOn(global, "fetch").mockImplementationOnce(
           () =>
             Promise.resolve({

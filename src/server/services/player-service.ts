@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import SteamAPIService from "./steam-api-service";
-import { GetOwnedGamesResponse, type SteamGame } from "~/types";
+import { type GetOwnedGamesResponse, type SteamGame } from "~/types";
 
 export default class PlayerService {
   private readonly steamService: SteamAPIService;
