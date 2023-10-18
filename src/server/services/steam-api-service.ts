@@ -7,6 +7,7 @@ import {
   RecentlyPlayedGamesResponseSchema,
   ResolveVanityURLResponseSchema,
 } from "../schemas/steam-api";
+import { redis } from "~/utils/redis";
 
 export const STEAM_WEB_API_URL = "https://api.steampowered.com";
 
@@ -17,6 +18,18 @@ export default class SteamAPIService {
    * docs: https://developer.valvesoftware.com/wiki/Steam_Web_API#GetOwnedGames_.28v0001.29
    */
   public async getOwnedGames(steamUserId: string) {
+    const cacheKey = `${steamUserId}-games`;
+
+    const cachedValue = await redis.get(cacheKey);
+
+    if (cachedValue) {
+      const responseData = OwnedGamesResponseSchema.parse(
+        JSON.parse(cachedValue),
+      );
+      console.log("fetched from cache");
+      return responseData.response;
+    }
+
     const playerOwnedEndpoint = new URL(
       `${STEAM_WEB_API_URL}/IPlayerService/GetOwnedGames/v1`,
     );
@@ -43,6 +56,9 @@ export default class SteamAPIService {
     }
 
     const responseData = OwnedGamesResponseSchema.parse(await response.json());
+
+    // expire cache in an hour
+    await redis.set(cacheKey, JSON.stringify(responseData), "EX", 3600);
 
     return responseData.response;
   }

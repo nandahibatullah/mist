@@ -9,6 +9,7 @@ export const env = createEnv({
   server: {
     NODE_ENV: z.enum(["development", "test", "production"]),
     STEAM_API_KEY: z.string(),
+    REDIS_URL: z.string(),
   },
 
   /**
@@ -26,7 +27,8 @@ export const env = createEnv({
    */
   runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,
-    STEAM_API_KEY: process.env.STEAM_API_KEY
+    STEAM_API_KEY: process.env.STEAM_API_KEY,
+    REDIS_URL: process.env.REDIS_URL,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**
