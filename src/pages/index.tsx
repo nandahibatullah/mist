@@ -8,7 +8,7 @@ import {
 } from "@mantine/core";
 import { useForm, zodResolver } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
-import { useRouter } from "next/router";
+import Router, { useRouter } from "next/router";
 import { useEffect } from "react";
 
 import { z } from "zod";
@@ -32,20 +32,25 @@ export default function Home() {
     },
   });
   const router = useRouter();
+  const pageErrors = router.query?.error;
 
   useEffect(() => {
-    if (router.query?.error === "not-found") {
+    if (pageErrors === "not-found") {
       notifications.show({
         title: "Steam profile not found",
         message: "Failed loading user",
         color: "red",
       });
-      void router.push("/");
+      /**
+       * Need to reference singleton router so that we don't need to ignore the es-lint dependency rule
+       * as we don't actually want it as a dependency as we aren't keen to have a side effect run
+       * every time router changes.
+       */
+      void Router.push("/");
     }
-  });
+  }, [pageErrors]);
 
   const handleSubmit = (data: SteamInfoFormData) => {
-    console.log(data.steamUsername);
     void router.push(`/player/${data.steamUsername}`);
   };
 
