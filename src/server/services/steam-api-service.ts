@@ -26,7 +26,6 @@ export default class SteamAPIService {
       const responseData = OwnedGamesResponseSchema.parse(
         JSON.parse(cachedValue),
       );
-      console.log("fetched from cache");
       return responseData.response;
     }
 
