@@ -95,7 +95,7 @@ describe("PlayerService", () => {
 
       test("returns formatted recently played games", async () => {
         const { games } = MockRecentlyPlayedGamesResponse.response;
-        const recentlyPlayedGames = games.map((game) => {
+        const recentlyPlayedGames = games?.map((game) => {
           const recentPlaytimeInHours = (game.playtime_2weeks / 60).toFixed(1);
           return {
             appId: game.appid,
@@ -134,6 +134,38 @@ describe("PlayerService", () => {
         await expect(() =>
           service.fetchSummary("not-correct-id"),
         ).rejects.toThrow(/Information for player: not-correct-id not found/);
+      });
+    });
+
+    describe("when recentlyPlayedGames has no entries", () => {
+      beforeEach(() => {
+        vi.spyOn(
+          SteamAPIService.prototype,
+          "getPlayerSummaries",
+        ).mockImplementationOnce(() =>
+          Promise.resolve(MockGetPlayerSummariesResponse.response),
+        );
+        vi.spyOn(
+          SteamAPIService.prototype,
+          "getOwnedGames",
+        ).mockImplementationOnce(() =>
+          Promise.resolve(MockGetOwnedGamesResponse.response),
+        );
+        vi.spyOn(
+          SteamAPIService.prototype,
+          "fetchRecentlyPlayed",
+        ).mockImplementationOnce(() =>
+          Promise.resolve({
+            ...MockRecentlyPlayedGamesResponse.response,
+            games: undefined,
+          }),
+        );
+      });
+
+      test("returns undefined for recentlyPlayed", async () => {
+        const response = await service.fetchSummary("steam-id");
+
+        expect(response.playerInfo.recentlyPlayedGames).toEqual(undefined);
       });
     });
   });

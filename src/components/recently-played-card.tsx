@@ -5,12 +5,12 @@ const gameIconResolver = (appId: number) => {
   return `https://cdn.akamai.steamstatic.com/steam/apps/${appId}/header.jpg`;
 };
 
-type RecentlyPlayedGame = PlayerInfo["recentlyPlayedGames"][0];
+type RecentlyPlayedGames = PlayerInfo["recentlyPlayedGames"];
 
 export const RecentlyPlayedCard = ({
   recentlyPlayedGames,
 }: {
-  recentlyPlayedGames: RecentlyPlayedGame[];
+  recentlyPlayedGames: RecentlyPlayedGames;
 }) => {
   const DetailCard = ({
     children,
@@ -35,7 +35,7 @@ export const RecentlyPlayedCard = ({
         <Text fw={500}>Recently Played Games</Text>
       </Group>
       <div className="grid grid-cols-2 gap-4 px-4 py-4 lg:grid-cols-3">
-        {recentlyPlayedGames.map((game, index) => (
+        {recentlyPlayedGames?.map((game, index) => (
           <DetailCard key={index} classNames="col-span-1 lg:col-span-1">
             <Card.Section>
               <Image

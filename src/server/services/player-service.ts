@@ -26,7 +26,7 @@ export default class PlayerService {
     const recentlyPlayedGames = await this.steamService.fetchRecentlyPlayed(
       steamUserId,
     );
-    const formattedRecentlyPlayedGames = recentlyPlayedGames.games.map(
+    const formattedRecentlyPlayedGames = recentlyPlayedGames.games?.map(
       (game) => {
         const recentPlaytimeInHours = (game.playtime_2weeks / 60).toFixed(1);
         return {
